@@ -560,11 +560,17 @@ class full_searchModel extends full_search
   {
 //    if(Context::get('mid') !== 'lab2') return;
 
-    if($obj->search_target && $obj->search_keyword)
+    $oModuleModel = getModel('module');
+    $full_search_config = $oModuleModel->getModuleConfig('full_search');
+
+    if($full_search_config->is_full_search == 'Y')
     {
-      unset($obj->page);
-      unset($obj->search_target);
-      unset($obj->search_keyword);
+      if($obj->search_target && $obj->search_keyword)
+      {
+        unset($obj->page);
+        unset($obj->search_target);
+        unset($obj->search_keyword);
+      }
     }
   }
 
@@ -572,13 +578,19 @@ class full_searchModel extends full_search
   {
 //    if(Context::get('mid') !== 'lab2') return;
 
-    if(Context::get('search_target') && Context::get('search_keyword'))
+    $oModuleModel = getModel('module');
+    $full_search_config = $oModuleModel->getModuleConfig('full_search');
+
+    if($full_search_config->is_full_search == 'Y')
     {
-      $_this = $GLOBALS['_loaded_module']['board']['view']['svc'];
-      $args = $this->dispBoardContentList($_this);
-      $args->columnList = $_this->columnList;
-  
-      $output = $this->getDocumentList($args, $args->except_notice, TRUE, $args->columnList);
+      if(Context::get('search_target') && Context::get('search_keyword'))
+      {
+        $_this = $GLOBALS['_loaded_module']['board']['view']['svc'];
+        $args = $this->dispBoardContentList($_this);
+        $args->columnList = $_this->columnList;
+    
+        $output = $this->getDocumentList($args, $args->except_notice, TRUE, $args->columnList);
+      }
     }
   }
 }
