@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+    <grants />
+    <permissions>
+        <permission action="procFull_searchAdminGeneralConfig" target="manager" />
+    </permissions>
+    <actions>
+        <action name="procFull_searchAdminGeneralConfig" type="controller" />
+        <action name="dispFull_searchAdminGeneralConfig" type="view" admin_index="true" menu_name="full_search" />
+        <action name="getDocumentListTotal" type="model" />
+    </actions>
+    <menus />
+</module>
