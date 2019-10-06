@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <lang>
-    <item name="full_search_general_config">
-        <value xml:lang="en"><![CDATA[Full Search General settings]]></value>
-        <value xml:lang="ko"><![CDATA[게시판 전체 검색 기본 설정]]></value>
-        <value xml:lang="jp"><![CDATA[統合建設基本設定]]></value>
-    </item>
-    <item name="is_full_search">
-        <value xml:lang="en"><![CDATA[Full search enabled]]></value>
-        <value xml:lang="ko"><![CDATA[게시판 전체 검색 사용하기]]></value>
-        <value xml:lang="jp"><![CDATA[統合検索有効]]></value>
-    </item>
+  <item name="full_search_general_config">
+    <value xml:lang="en"><![CDATA[Full Search General settings]]></value>
+    <value xml:lang="ko"><![CDATA[게시판 전체 검색 기본 설정]]></value>
+    <value xml:lang="jp"><![CDATA[統合建設基本設定]]></value>
+  </item>
+  <item name="is_full_search">
+    <value xml:lang="en"><![CDATA[Full search enabled]]></value>
+    <value xml:lang="ko"><![CDATA[게시판 전체 검색 사용하기]]></value>
+    <value xml:lang="jp"><![CDATA[統合検索有効]]></value>
+  </item>
 </lang>

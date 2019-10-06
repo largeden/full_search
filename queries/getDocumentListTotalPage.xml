@@ -1,201 +1,201 @@
 <query id="getDocumentListTotalPage" action="select">
-    <tables>
-      <table query="true" alias="sub_comments">
-          <tables>
-              <table query="true" alias="sub_document_tags">
-                <tables>
-                    <table query="true" alias="sub_document_extra_vars">
-                        <tables>
-                            <table name="documents" alias="documents" />
-                            <table name="document_extra_vars" alias="document_extra_vars" type="left join">
-                                <conditions>
-                                    <condition operation="equal" column="documents.document_srl" default="document_extra_vars.document_srl" />
-                                </conditions>
-                            </table>
-                        </tables>
-                        <columns>
-                            <column name="documents.module_srl" />
-                            <column name="documents.document_srl" />
-                            <column name="GROUP_CONCAT(IFNULL(document_extra_vars.value,0))" alias="value" />
-                        </columns>
-                        <conditions>
-                            <group pipe="and">
-                                <condition operation="in" column="documents.module_srl" var="module_srl" filter="number" />
-                                <condition operation="notin" column="documents.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
-                                <condition operation="in" column="documents.category_srl" var="category_srl" pipe="and" />
-                                <condition operation="equal" column="documents.is_notice" var="s_is_notice" pipe="and" />
-                                <condition operation="in" column="documents.member_srl" var="member_srl" pipe="and" />
-                                <condition operation="in" column="documents.status" var="statusList" pipe="and" />
-                                <condition operation="equal" column="documents.lang_code" var="lang_code" pipe="and" />
-                                <condition operation="in" column="IFNULL(document_extra_vars.lang_code,0)" var="s_lang_code" pipe="and" />
-                            </group>
-                            <group pipe="and">
-                                <condition operation="more" column="documents.list_order" var="division" />
-                                <condition operation="below" column="documents.list_order" var="last_division" pipe="and" />
-                            </group>
-                            <group pipe="and">
-                                <condition operation="in" column="IFNULL(document_extra_vars.var_idx,0)" var="var_idx" filter="number" />
-                                <condition operation="notin" column="IFNULL(document_extra_vars.var_idx,0)" var="exclude_var_idx" filter="number" pipe="and" />
-                                <condition operation="in" column="IFNULL(document_extra_vars.eid,0)" var="eid" pipe="and" />
-                                <condition operation="notin" column="IFNULL(document_extra_vars.eid,0)" var="exclude_eid" pipe="and" />
-                            </group>
-                            <group pipe="and">
-                                <condition operation="equal" column="documents.user_name" var="s_user_name" />
-                                <condition operation="equal" column="documents.user_id" var="s_user_id" pipe="or" />
-                                <condition operation="like" column="documents.nick_name" var="s_nick_name" pipe="or" />
-                                <condition operation="like" column="documents.email_address" var="s_email_address" pipe="or" />
-                                <condition operation="like" column="documents.homepage" var="s_homepage" pipe="or" />
-                                <condition operation="like" column="documents.tags" var="s_tags" pipe="or" />
-                                <condition operation="equal" column="documents.member_srl" var="s_member_srl" pipe="or" />
-                                <condition operation="more" column="documents.readed_count" var="s_readed_count" pipe="or" />
-                                <condition operation="more" column="documents.voted_count" var="s_voted_count" pipe="or" />
-                                <condition operation="less" column="documents.blamed_count" var="s_blamed_count" pipe="or" />
-                                <condition operation="more" column="documents.comment_count" var="s_comment_count" pipe="or" />
-                                <condition operation="more" column="documents.trackback_count" var="s_trackback_count" pipe="or" />
-                                <condition operation="more" column="documents.uploaded_count" var="s_uploaded_count" pipe="or" />
-                                <condition operation="like_prefix" column="documents.regdate" var="s_regdate" pipe="or" />
-                                <condition operation="like_prefix" column="documents.last_update" var="s_last_update" pipe="or" />
-                                <condition operation="like_prefix" column="documents.ipaddress" var="s_ipaddress" pipe="or" />
-                            </group>
-                            <group pipe="and">
-                                <condition operation="more" column="documents.last_update" var="start_date" pipe="and" />
-                                <condition operation="less" column="documents.last_update" var="end_date" pipe="and" />
-                            </group>
-                        </conditions>
-                        <navigation />
-                        <groups>
-                            <group column="documents.document_srl" />
-                        </groups>
-                    </table>
-                    <table name="tags" alias="tags" type="left join">
-                        <conditions>
-                            <condition operation="equal" column="sub_document_extra_vars.document_srl" default="tags.document_srl" />
-                        </conditions>
-                    </table>
-                </tables>
-                <columns>
-                    <column name="sub_document_extra_vars.module_srl" />
-                    <column name="sub_document_extra_vars.document_srl" />
-                    <column name="sub_document_extra_vars.value" />
-                    <column name="GROUP_CONCAT(IFNULL(tags.tag,0))" alias="tag" />
-                </columns>
+  <tables>
+    <table query="true" alias="sub_comments">
+      <tables>
+        <table query="true" alias="sub_document_tags">
+        <tables>
+          <table query="true" alias="sub_document_extra_vars">
+            <tables>
+              <table name="documents" alias="documents" />
+              <table name="document_extra_vars" alias="document_extra_vars" type="left join">
                 <conditions>
-                    <condition operation="in" column="sub_document_extra_vars.module_srl" var="module_srl" filter="number" />
-                    <condition operation="notin" column="sub_document_extra_vars.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
+                  <condition operation="equal" column="documents.document_srl" default="document_extra_vars.document_srl" />
                 </conditions>
-                <navigation />
-                <groups>
-                    <group column="sub_document_extra_vars.document_srl" />
-                </groups>
               </table>
-              <table name="comments" alias="comments" type="left join">
-                  <conditions>
-                      <condition operation="equal" column="sub_document_tags.document_srl" default="comments.document_srl" />
-                  </conditions>
-              </table>
-          </tables>
-          <columns>
-              <column name="sub_document_tags.module_srl" />
-              <column name="sub_document_tags.document_srl" />
-              <column name="sub_document_tags.tag" />
-              <column name="sub_document_tags.value" />
-              <column name="GROUP_CONCAT(IFNULL(comments.content,0))" alias="comments_content" />
-          </columns>
-          <conditions>
-              <condition operation="in" column="sub_document_tags.module_srl" var="module_srl" filter="number" />
-              <condition operation="notin" column="sub_document_tags.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
-              <condition operation="equal" column="comments.is_secret" var="is_secret" pipe="and" />
-          </conditions>
-          <navigation />
-          <groups>
-              <group column="sub_document_tags.document_srl" />
-          </groups>
-        </table>
-        <table name="documents" alias="documents" type="left join">
+            </tables>
+            <columns>
+              <column name="documents.module_srl" />
+              <column name="documents.document_srl" />
+              <column name="GROUP_CONCAT(IFNULL(document_extra_vars.value,0))" alias="value" />
+            </columns>
             <conditions>
-                <condition operation="equal" column="sub_comments.document_srl" default="documents.document_srl" />
+              <group pipe="and">
+                <condition operation="in" column="documents.module_srl" var="module_srl" filter="number" />
+                <condition operation="notin" column="documents.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
+                <condition operation="in" column="documents.category_srl" var="category_srl" pipe="and" />
+                <condition operation="equal" column="documents.is_notice" var="s_is_notice" pipe="and" />
+                <condition operation="in" column="documents.member_srl" var="member_srl" pipe="and" />
+                <condition operation="in" column="documents.status" var="statusList" pipe="and" />
+                <condition operation="equal" column="documents.lang_code" var="lang_code" pipe="and" />
+                <condition operation="in" column="IFNULL(document_extra_vars.lang_code,0)" var="s_lang_code" pipe="and" />
+              </group>
+              <group pipe="and">
+                <condition operation="more" column="documents.list_order" var="division" />
+                <condition operation="below" column="documents.list_order" var="last_division" pipe="and" />
+              </group>
+              <group pipe="and">
+                <condition operation="in" column="IFNULL(document_extra_vars.var_idx,0)" var="var_idx" filter="number" />
+                <condition operation="notin" column="IFNULL(document_extra_vars.var_idx,0)" var="exclude_var_idx" filter="number" pipe="and" />
+                <condition operation="in" column="IFNULL(document_extra_vars.eid,0)" var="eid" pipe="and" />
+                <condition operation="notin" column="IFNULL(document_extra_vars.eid,0)" var="exclude_eid" pipe="and" />
+              </group>
+              <group pipe="and">
+                <condition operation="equal" column="documents.user_name" var="s_user_name" />
+                <condition operation="equal" column="documents.user_id" var="s_user_id" pipe="or" />
+                <condition operation="like" column="documents.nick_name" var="s_nick_name" pipe="or" />
+                <condition operation="like" column="documents.email_address" var="s_email_address" pipe="or" />
+                <condition operation="like" column="documents.homepage" var="s_homepage" pipe="or" />
+                <condition operation="like" column="documents.tags" var="s_tags" pipe="or" />
+                <condition operation="equal" column="documents.member_srl" var="s_member_srl" pipe="or" />
+                <condition operation="more" column="documents.readed_count" var="s_readed_count" pipe="or" />
+                <condition operation="more" column="documents.voted_count" var="s_voted_count" pipe="or" />
+                <condition operation="less" column="documents.blamed_count" var="s_blamed_count" pipe="or" />
+                <condition operation="more" column="documents.comment_count" var="s_comment_count" pipe="or" />
+                <condition operation="more" column="documents.trackback_count" var="s_trackback_count" pipe="or" />
+                <condition operation="more" column="documents.uploaded_count" var="s_uploaded_count" pipe="or" />
+                <condition operation="like_prefix" column="documents.regdate" var="s_regdate" pipe="or" />
+                <condition operation="like_prefix" column="documents.last_update" var="s_last_update" pipe="or" />
+                <condition operation="like_prefix" column="documents.ipaddress" var="s_ipaddress" pipe="or" />
+              </group>
+              <group pipe="and">
+                <condition operation="more" column="documents.last_update" var="start_date" pipe="and" />
+                <condition operation="less" column="documents.last_update" var="end_date" pipe="and" />
+              </group>
             </conditions>
+            <navigation />
+            <groups>
+              <group column="documents.document_srl" />
+            </groups>
+          </table>
+          <table name="tags" alias="tags" type="left join">
+            <conditions>
+              <condition operation="equal" column="sub_document_extra_vars.document_srl" default="tags.document_srl" />
+            </conditions>
+          </table>
+        </tables>
+        <columns>
+          <column name="sub_document_extra_vars.module_srl" />
+          <column name="sub_document_extra_vars.document_srl" />
+          <column name="sub_document_extra_vars.value" />
+          <column name="GROUP_CONCAT(IFNULL(tags.tag,0))" alias="tag" />
+        </columns>
+        <conditions>
+          <condition operation="in" column="sub_document_extra_vars.module_srl" var="module_srl" filter="number" />
+          <condition operation="notin" column="sub_document_extra_vars.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
+        </conditions>
+        <navigation />
+        <groups>
+          <group column="sub_document_extra_vars.document_srl" />
+        </groups>
         </table>
-    </tables>
-    <columns>
-        <column name="count(documents.document_srl)" alias="count" />
-    </columns>
-    <conditions>
-        <group pipe="and">
-            <condition operation="like" column="documents.title" var="s_title1" />
-            <condition operation="like" column="documents.title" var="s_title2" pipe="and" />
-            <condition operation="like" column="documents.title" var="s_title3" pipe="and" />
-            <condition operation="like" column="documents.title" var="s_title4" pipe="and" />
-            <condition operation="like" column="documents.title" var="s_title5" pipe="and" />
+        <table name="comments" alias="comments" type="left join">
+          <conditions>
+            <condition operation="equal" column="sub_document_tags.document_srl" default="comments.document_srl" />
+          </conditions>
+        </table>
+      </tables>
+      <columns>
+        <column name="sub_document_tags.module_srl" />
+        <column name="sub_document_tags.document_srl" />
+        <column name="sub_document_tags.tag" />
+        <column name="sub_document_tags.value" />
+        <column name="GROUP_CONCAT(IFNULL(comments.content,0))" alias="comments_content" />
+      </columns>
+      <conditions>
+        <condition operation="in" column="sub_document_tags.module_srl" var="module_srl" filter="number" />
+        <condition operation="notin" column="sub_document_tags.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
+        <condition operation="equal" column="comments.is_secret" var="is_secret" pipe="and" />
+      </conditions>
+      <navigation />
+      <groups>
+        <group column="sub_document_tags.document_srl" />
+      </groups>
+    </table>
+    <table name="documents" alias="documents" type="left join">
+      <conditions>
+        <condition operation="equal" column="sub_comments.document_srl" default="documents.document_srl" />
+      </conditions>
+    </table>
+  </tables>
+  <columns>
+    <column name="count(documents.document_srl)" alias="count" />
+  </columns>
+  <conditions>
+    <group pipe="and">
+      <condition operation="like" column="documents.title" var="s_title1" />
+      <condition operation="like" column="documents.title" var="s_title2" pipe="and" />
+      <condition operation="like" column="documents.title" var="s_title3" pipe="and" />
+      <condition operation="like" column="documents.title" var="s_title4" pipe="and" />
+      <condition operation="like" column="documents.title" var="s_title5" pipe="and" />
 
-            <condition operation="like" column="documents.content" var="s_content1" pipe="and" />
-            <condition operation="like" column="documents.content" var="s_content2" pipe="and" />
-            <condition operation="like" column="documents.content" var="s_content3" pipe="and" />
-            <condition operation="like" column="documents.content" var="s_content4" pipe="and" />
-            <condition operation="like" column="documents.content" var="s_content5" pipe="and" />
+      <condition operation="like" column="documents.content" var="s_content1" pipe="and" />
+      <condition operation="like" column="documents.content" var="s_content2" pipe="and" />
+      <condition operation="like" column="documents.content" var="s_content3" pipe="and" />
+      <condition operation="like" column="documents.content" var="s_content4" pipe="and" />
+      <condition operation="like" column="documents.content" var="s_content5" pipe="and" />
 
-            <condition operation="like" column="sub_comments.tag" var="s_tag1" pipe="and" />
-            <condition operation="like" column="sub_comments.tag" var="s_tag2" pipe="and" />
-            <condition operation="like" column="sub_comments.tag" var="s_tag3" pipe="and" />
-            <condition operation="like" column="sub_comments.tag" var="s_tag4" pipe="and" />
-            <condition operation="like" column="sub_comments.tag" var="s_tag5" pipe="and" />
+      <condition operation="like" column="sub_comments.tag" var="s_tag1" pipe="and" />
+      <condition operation="like" column="sub_comments.tag" var="s_tag2" pipe="and" />
+      <condition operation="like" column="sub_comments.tag" var="s_tag3" pipe="and" />
+      <condition operation="like" column="sub_comments.tag" var="s_tag4" pipe="and" />
+      <condition operation="like" column="sub_comments.tag" var="s_tag5" pipe="and" />
 
-            <condition operation="like" column="sub_comments.value" var="s_extra_vars1" pipe="and" />
-            <condition operation="like" column="sub_comments.value" var="s_extra_vars2" pipe="and" />
-            <condition operation="like" column="sub_comments.value" var="s_extra_vars3" pipe="and" />
-            <condition operation="like" column="sub_comments.value" var="s_extra_vars4" pipe="and" />
-            <condition operation="like" column="sub_comments.value" var="s_extra_vars5" pipe="and" />
+      <condition operation="like" column="sub_comments.value" var="s_extra_vars1" pipe="and" />
+      <condition operation="like" column="sub_comments.value" var="s_extra_vars2" pipe="and" />
+      <condition operation="like" column="sub_comments.value" var="s_extra_vars3" pipe="and" />
+      <condition operation="like" column="sub_comments.value" var="s_extra_vars4" pipe="and" />
+      <condition operation="like" column="sub_comments.value" var="s_extra_vars5" pipe="and" />
 
-            <condition operation="like" column="sub_comments.comments_content" var="s_comment1" pipe="and" />
-            <condition operation="like" column="sub_comments.comments_content" var="s_comment2" pipe="and" />
-            <condition operation="like" column="sub_comments.comments_content" var="s_comment3" pipe="and" />
-            <condition operation="like" column="sub_comments.comments_content" var="s_comment4" pipe="and" />
-            <condition operation="like" column="sub_comments.comments_content" var="s_comment5" pipe="and" />
+      <condition operation="like" column="sub_comments.comments_content" var="s_comment1" pipe="and" />
+      <condition operation="like" column="sub_comments.comments_content" var="s_comment2" pipe="and" />
+      <condition operation="like" column="sub_comments.comments_content" var="s_comment3" pipe="and" />
+      <condition operation="like" column="sub_comments.comments_content" var="s_comment4" pipe="and" />
+      <condition operation="like" column="sub_comments.comments_content" var="s_comment5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content5" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content)" var="s_title_content5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment5" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content)" var="s_title_content_comment5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag5" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.tag)" var="s_title_content_tag5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars5" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.value)" var="s_title_content_extra_vars5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag5" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag)" var="s_title_content_comment_tag5" pipe="and" />
 
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content1" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content2" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content3" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content4" pipe="and" />
-            <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content5" pipe="and" />
-        </group>
-    		<group pipe="and">
-    			<condition operation="less" column="documents.list_order" var="list_order" filter="number" pipe="and" />
-    			<condition operation="more" column="documents.list_order" var="rev_list_order" filter="number" pipe="and" />
-    			<condition operation="less" column="documents.update_order" var="update_order" filter="number" pipe="and" />
-    			<condition operation="more" column="documents.update_order" var="rev_update_order" filter="number" pipe="and" />
-    			<condition operation="less" column="documents.regdate" var="rev_regdate" filter="number" pipe="and" />
-    			<condition operation="more" column="documents.regdate" var="regdate" filter="number" pipe="and" />
-    		</group>
-    </conditions>
-    <navigation />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content1" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content2" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content3" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content4" pipe="and" />
+      <condition operation="like" column="concat(documents.title,documents.content,sub_comments.comments_content,sub_comments.tag,sub_comments.value)" var="s_all_content5" pipe="and" />
+    </group>
+  		<group pipe="and">
+  			<condition operation="less" column="documents.list_order" var="list_order" filter="number" pipe="and" />
+  			<condition operation="more" column="documents.list_order" var="rev_list_order" filter="number" pipe="and" />
+  			<condition operation="less" column="documents.update_order" var="update_order" filter="number" pipe="and" />
+  			<condition operation="more" column="documents.update_order" var="rev_update_order" filter="number" pipe="and" />
+  			<condition operation="less" column="documents.regdate" var="rev_regdate" filter="number" pipe="and" />
+  			<condition operation="more" column="documents.regdate" var="regdate" filter="number" pipe="and" />
+  		</group>
+  </conditions>
+  <navigation />
 </query>

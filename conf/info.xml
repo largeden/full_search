@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="0.2">
-    <title xml:lang="en">Full Search</title>
-    <title xml:lang="ko">게시판 전체 검색</title>
-    <title xml:lang="jp">統合検索</title>
-    <description xml:lang="en">You can integration searches titles, contents, comments, tags and extended variables within the board module.</description>
-    <description xml:lang="ko">게시판 모듈 내에서 타이틀, 본문, 댓글, 태그, 사용자 정의를 전체 검색할 수 있습니다.</description>
-    <description xml:lang="jp">掲示板モジュール内でタイトル、本文、コメント、タグ、拡張変数を統合検索することができます。</description>
-    <version>0.1</version>
-    <date>2019-10-06</date>
-    <category>service</category>
+  <title xml:lang="en">Full Search</title>
+  <title xml:lang="ko">게시판 전체 검색</title>
+  <title xml:lang="jp">統合検索</title>
+  <description xml:lang="en">You can integration searches titles, contents, comments, tags and extended variables within the board module.</description>
+  <description xml:lang="ko">게시판 모듈 내에서 타이틀, 본문, 댓글, 태그, 사용자 정의를 전체 검색할 수 있습니다.</description>
+  <description xml:lang="jp">掲示板モジュール内でタイトル、本文、コメント、タグ、拡張変数を統合検索することができます。</description>
+  <version>0.1</version>
+  <date>2019-10-06</date>
+  <category>service</category>
 
-    <author email_address="largeden@romanesque.co" link="//romanesque.co">
-        <name xml:lang="en">largeden</name>
-        <name xml:lang="ko">라르게덴</name>
-        <name xml:lang="jp">ラルゲデン</name>
-    </author>
+  <author email_address="largeden@romanesque.co" link="//romanesque.co">
+    <name xml:lang="en">largeden</name>
+    <name xml:lang="ko">라르게덴</name>
+    <name xml:lang="jp">ラルゲデン</name>
+  </author>
 </module>
