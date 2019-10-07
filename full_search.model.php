@@ -344,7 +344,8 @@ class full_searchModel extends full_search
             }
             break;
           case strpos($search_target,'extra_vars')!==false :
-              $var_idx[] = substr($search_target, strlen('extra_vars'));
+            $var_idx[] = substr($search_target, strlen('extra_vars'));
+            $search_list['extra_vars'] = 's_extra_vars';
             break;
           default : /* extra_vars eid */ 
             $eid[] = $search_target;
