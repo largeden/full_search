@@ -1,1 +1,0 @@
-<?php/** * full_searchController class * controller class of the full_search module * @author largeden (largeden@romanesque.io) * @package /modules/full_search */class full_searchController extends full_search{}/* End of file full_search.controller.php *//* Location: ./modules/full_search/full_search.controller.php */
