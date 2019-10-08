@@ -19,19 +19,13 @@ class full_searchModel extends full_search
     // setup module_srl/page number/ list number/ page count
     $args = new stdClass();
     $args->module_srl = $_this->module_srl;
-    $args->page = Context::get('page');
+		$args->page = intval(Context::get('page')) ?: null;
     $args->list_count = $_this->list_count;
     $args->page_count = $_this->page_count;
 
     // get the search target and keyword
     $args->search_target = Context::get('search_target');
     $args->search_keyword = Context::get('search_keyword');
-
-    $search_option = Context::get('search_option');
-    if($search_option==FALSE)
-    {
-      $search_option = $_this->search_option;
-    }
 
     // if the category is enabled, then get the category
     if($_this->module_info->use_category=='Y')
@@ -53,15 +47,26 @@ class full_searchModel extends full_search
 
     // set the current page of documents
     $document_srl = Context::get('document_srl');
-    if($document_srl)
-    {
+		if($document_srl && $_this->module_info->skip_bottom_list_for_robot === 'Y' && isCrawler())
+		{
+			Context::set('page', $args->page = null);
+		}
+		elseif(!$args->page && $document_srl)
+		{
       $oDocument = $oDocumentModel->getDocument($document_srl);
-      
       if($oDocument->isExists() && !$oDocument->isNotice())
       {
-        $page = $this->getDocumentPage($oDocument, $args);
-        Context::set('page', $page);
-        $args->page = $page;
+				$days = $_this->module_info->skip_bottom_list_days ?: 30;
+				if($oDocument->getRegdateTime() < (time() - (86400 * $days)) && $_this->module_info->skip_bottom_list_for_olddoc === 'Y')
+				{
+					Context::set('page', $args->page = null);
+				}
+				else
+				{
+          $page = $this->getDocumentPage($oDocument, $args);
+          Context::set('page', $page);
+          $args->page = $page;
+        }
       }
     }
 
@@ -71,20 +76,18 @@ class full_searchModel extends full_search
       $args->list_count = $_this->search_list_count;
     }
 
-    // if the consultation function is enabled,  the get the logged user information
-    if($this->consultation)
-    {
-      $logged_info = Context::get('logged_info');
+		// if the consultation function is enabled,  the get the logged user information
+		if($_this->consultation)
+		{
+			$logged_info = Context::get('logged_info');
+			$args->member_srl = $logged_info->member_srl;
 
-      if($this->module_info->use_anonymous === 'Y')
-      {
-        $args->member_srl = array($logged_info->member_srl, $logged_info->member_srl * -1);
-      }
-      else
-      {
-        $args->member_srl = $logged_info->member_srl;
-      }
-    }
+			if($this->module_info->use_anonymous === 'Y')
+			{
+				unset($args->member_srl);
+				$args->member_srls = $logged_info->member_srl . ',' . $logged_info->member_srl * -1;
+			}
+		}
 
     return $args;
   }
