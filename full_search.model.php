@@ -38,11 +38,11 @@ class full_searchModel extends full_search
     $args->order_type = Context::get('order_type');
     if(!in_array($args->sort_index, $_this->order_target))
     {
-      $args->sort_index = $_this->module_info->order_target?$_this->module_info->order_target:'list_order';
+      $args->sort_index = $_this->module_info->order_target ? $_this->module_info->order_target : 'list_order';
     }
     if(!in_array($args->order_type, array('asc','desc')))
     {
-      $args->order_type = $_this->module_info->order_type?$_this->module_info->order_type:'asc';
+      $args->order_type = $_this->module_info->order_type ? $_this->module_info->order_type:'asc';
     }
 
     // set the current page of documents
@@ -105,69 +105,24 @@ class full_searchModel extends full_search
     $oDocumentModel = getModel('document');
 
     // If an alternate output is set, use it instead of running the default queries
-    $use_alternate_output = (isset($obj->use_alternate_output) && $obj->use_alternate_output instanceof BaseObject);
-    if (!$use_alternate_output)
-    {
-      $this->_setSearchOption($obj, $args, $query_id, $use_division);
-    }
-
+    $use_alternate_output = (isset($obj->use_alternate_output) &&  (class_exists('BaseObject') ? $obj->use_alternate_output instanceof BaseObject : $obj->use_alternate_output instanceof Object));
     if ($use_alternate_output)
     {
       $output = $obj->use_alternate_output;
       unset($obj->use_alternate_output);
     }
-    elseif ($sort_check->isExtraVars && substr_count($obj->search_target,'extra_vars'))
+    elseif (!$use_alternate_output)
     {
-      $query_id = 'document.getDocumentListWithinExtraVarsExtraSort';
-      $args->sort_index = str_replace('documents.','',$args->sort_index);
-      $output = executeQueryArray($query_id, $args);
+      $this->_setSearchOption($obj, $args, $query_id, $use_division);
+      $output = executeQueryArray($query_id, $args, $args->columnList);
     }
-    elseif ($sort_check->isExtraVars)
-    {
-      $output = executeQueryArray($query_id, $args);
-    }
-    else
-    {
-      // document.getDocumentList query execution
-      // Query_id if you have a group by clause getDocumentListWithinTag or used again to perform the query because
-      $groupByQuery = array('document.getDocumentListWithinTag' => 1);
-      if(isset($groupByQuery[$query_id]))
-      {
-        $group_args = clone($args);
-        $group_args->sort_index = 'documents.'.$args->sort_index;
-        $output = executeQueryArray($query_id, $group_args);
-        if(!$output->toBool()||!count($output->data)) return $output;
 
-        foreach($output->data as $key => $val)
-        {
-          if($val->document_srl) $target_srls[] = $val->document_srl;
-        }
-
-        $page_navigation = $output->page_navigation;
-        $keys = array_keys($output->data);
-        $virtual_number = $keys[0];
-
-        $target_args = new stdClass();
-        $target_args->document_srls = implode(',',$target_srls);
-        $target_args->list_order = $args->sort_index;
-        $target_args->order_type = $args->order_type;
-        $target_args->list_count = $args->list_count;
-        $target_args->page = 1;
-        $output = executeQueryArray('document.getDocuments', $target_args);
-        $output->page_navigation = $page_navigation;
-        $output->total_count = $page_navigation->total_count;
-        $output->total_page = $page_navigation->total_page;
-        $output->page = $page_navigation->cur_page;
-      }
-      else
-      {
-        $query_id = 'full_search.getDocumentListTotal';
-        $output = executeQueryArray($query_id, $args, $columnList);
-      }
-    }
     // Return if no result or an error occurs
-    if(!$output->toBool()||!count($output->data)) return $output;
-    $idx = 0;
+    if(!$output->toBool() || !count($output->data))
+    {
+      return $output;
+    }
+
     $data = $output->data;
     unset($output->data);
 
@@ -181,22 +136,32 @@ class full_searchModel extends full_search
     {
       foreach($data as $key => $attribute)
       {
-        if($attribute->is_notice == 'Y') $virtual_number --;
+        if($attribute->is_notice == 'Y')
+        {
+          $virtual_number --;
+        }
       }
     }
 
     foreach($data as $key => $attribute)
     {
-      if($except_notice && $attribute->is_notice == 'Y') continue;
-      $document_srl = $attribute->document_srl;
-      if(!$GLOBALS['XE_DOCUMENT_LIST'][$document_srl])
+      unset($attribute->value);
+      unset($attribute->tag);
+      unset($attribute->comments_content);
+
+      if($except_notice && $attribute->is_notice == 'Y')
       {
-        $oDocument = null;
-        $oDocument = new documentItem();
-        $oDocument->setAttribute($attribute, false);
-        if($is_admin) $oDocument->setGrant();
-        $GLOBALS['XE_DOCUMENT_LIST'][$document_srl] = $oDocument;
+        continue;
       }
+
+      $document_srl = $attribute->document_srl;
+
+      $oDocument = null;
+      $oDocument = new documentItem();
+      $oDocument->setAttribute($attribute, false);
+
+      if($is_admin) $oDocument->setGrant();
+      $GLOBALS['XE_DOCUMENT_LIST'][$document_srl] = $oDocument;
 
       $output->data[$virtual_number] = $GLOBALS['XE_DOCUMENT_LIST'][$document_srl];
       $virtual_number--;
@@ -228,71 +193,54 @@ class full_searchModel extends full_search
   function _setSearchOption($searchOpt, &$args, &$query_id, &$use_division)
   {
     $oDocumentModel = getModel('document');
+    $oModuleModel = getModel('module');
 
     // Variable check
     $args = new stdClass();
-    $args->category_srl = $searchOpt->category_srl?$searchOpt->category_srl:null;
-    $args->order_type = $searchOpt->order_type;
-    $args->page = $searchOpt->page?$searchOpt->page:1;
-    $args->list_count = $searchOpt->list_count?$searchOpt->list_count:20;
-    $args->page_count = $searchOpt->page_count?$searchOpt->page_count:10;
-    $args->start_date = $searchOpt->start_date?$searchOpt->start_date:null;
-    $args->end_date = $searchOpt->end_date?$searchOpt->end_date:null;
+    $args->module_srl = is_array($searchOpt->module_srl) ? implode(',', $searchOpt->module_srl) : $searchOpt->module_srl;
+    $args->exclude_module_srl = is_array($searchOpt->exclude_module_srl) ? implode(',', $searchOpt->exclude_module_srl) : $searchOpt->exclude_module_srl;
+    $args->exclude_var_idx = is_array($searchOpt->exclude_var_idx) ? implode(',', $searchOpt->exclude_var_idx) : $searchOpt->exclude_var_idx;
+    $args->exclude_eid = is_array($searchOpt->exclude_eid) ? implode(',', $searchOpt->exclude_eid) : $searchOpt->exclude_eid;
+    $args->category_srl = $searchOpt->category_srl ?: null;
     $args->member_srl = $searchOpt->member_srl ?: ($searchOpt->member_srls ?: null);
+		$args->order_type = $searchOpt->order_type === 'desc' ? 'desc' : 'asc';
+		$args->sort_index = $searchOpt->sort_index;
+    $args->page = $searchOpt->page ?: 1;
+    $args->list_count = $searchOpt->list_count ?: 20;
+    $args->page_count = $searchOpt->page_count ?: 10;
+    $args->start_date = $searchOpt->start_date ?: null;
+    $args->end_date = $searchOpt->end_date ?: null;
+		$args->s_is_notice = $searchOpt->except_notice ? 'N' : null;
+		$args->statusList = $searchOpt->statusList ?: array($oDocumentModel->getConfigStatus('public'), $oDocumentModel->getConfigStatus('secret'));
+		$args->columnList = $searchOpt->columnList ?: array();
 
-    $logged_info = Context::get('logged_info');
-
-    $args->sort_index = $searchOpt->sort_index;
-    
-    // Check the target and sequence alignment
-    $orderType = array('desc' => 1, 'asc' => 1);
-    if(!isset($orderType[$args->order_type])) $args->order_type = 'asc';
-
-    // If that came across mid module_srl instead of a direct module_srl guhaejum
     if($searchOpt->mid)
     {
-      $oModuleModel = getModel('module');
-      $args->module_srl = $oModuleModel->getModuleSrlByMid($searchOpt->mid);
-      unset($searchOpt->mid);
+      if(is_array($module_srl = $oModuleModel->getModuleSrlByMid($searchOpt->mid)))
+      {
+        $args->module_srl = $module_srl;
+        unset($searchOpt->mid);
+      }
     }
-
-    // Module_srl passed the array may be a check whether the array
-    if(is_array($searchOpt->module_srl)) $args->module_srl = implode(',', $searchOpt->module_srl);
-    else $args->module_srl = $searchOpt->module_srl;
-
-    // Except for the test module_srl
-    if(is_array($searchOpt->exclude_module_srl)) $args->exclude_module_srl = implode(',', $searchOpt->exclude_module_srl);
-    else $args->exclude_module_srl = $searchOpt->exclude_module_srl;
-
-    // only admin document list, temp document showing
-    if($searchOpt->statusList) $args->statusList = $searchOpt->statusList;
-    else
+    if($args->exclude_module_srl)
     {
-      if($logged_info->is_admin == 'Y' && !$searchOpt->module_srl)
-        $args->statusList = array($oDocumentModel->getConfigStatus('secret'), $oDocumentModel->getConfigStatus('public'), $oDocumentModel->getConfigStatus('temp'));
-      else
-        $args->statusList = array($oDocumentModel->getConfigStatus('secret'), $oDocumentModel->getConfigStatus('public'));
+      unset($args->module_srl);
     }
 
+    $args->lang_code = ($searchOpt->lang_code ?: Context::get('lang_code')) ?: Context::getLangType();
+    $args->s_lang_code = array($args->lang_code, 0);
     // Category is selected, further sub-categories until all conditions
-    if($args->category_srl)
+    if($args->category_srl && $args->module_srl)
     {
       $category_list = $oDocumentModel->getCategoryList($args->module_srl);
       $category_info = $category_list[$args->category_srl];
       $category_info->childs[] = $args->category_srl;
-      $args->category_srl = implode(',',$category_info->childs);
+      $args->category_srl = implode(',', $category_info->childs);
     }
 
-    $args->lang_code = Context::getLangType();
-    $args->s_lang_code = $args->lang_code.',0';
-
-    // Used to specify the default query id (based on several search options to query id modified)
     $query_id = 'full_search.getDocumentListTotal';
-
-    // If the search by specifying the document division naeyonggeomsaekil processed for
     $use_division = false;
 
-    if(!in_array($args->order_target, array('regdate', 'list_order', 'update_order'))) $args->order_target = 'regdate';
     if($searchOpt->search_target && $searchOpt->search_keyword)
     {
       $search_list = array();
