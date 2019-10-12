@@ -229,6 +229,7 @@ class full_searchModel extends full_search
 
     $args->lang_code = ($searchOpt->lang_code ?: Context::get('lang_code')) ?: Context::getLangType();
     $args->s_lang_code = array($args->lang_code, 0);
+
     // Category is selected, further sub-categories until all conditions
     if($args->category_srl && $args->module_srl)
     {
@@ -389,7 +390,10 @@ class full_searchModel extends full_search
 
       foreach($search_keywords as $i => $s)
       {
-        if($s == '') continue;
+        if($s == '')
+        {
+          continue;
+        }
 
         foreach($search_list as $k => $v)
         {
@@ -401,87 +405,60 @@ class full_searchModel extends full_search
     /**
      * list_order asc sort of division that can be used only when
      */
-    if($args->sort_index != 'list_order' || $args->order_type != 'asc') $use_division = false;
+    if($args->sort_index != 'list_order' || $args->order_type != 'asc')
+    {
+      $use_division = false;
+    }
 
     /**
      * If it is true, use_division changed to use the document division
      */
     if($use_division)
     {
-      // Division begins
-      $division = (int)Context::get('division');
+      $args->division = (int)Context::get('division');
+      $args->last_division = (int)Context::get('last_division');
 
-      // order by list_order and (module_srl===0 or module_srl may count), therefore case table full scan
-      if($args->sort_index == 'list_order' && ($args->exclude_module_srl === '0' || count(explode(',', $args->module_srl)) > 5))
-      {
-        $listSqlID = 'document.getDocumentListUseIndex';
-        $divisionSqlID = 'document.getDocumentDivisionUseIndex';
-      }
-      else
-      {
-        $listSqlID = 'document.getDocumentListTotal';
-        $divisionSqlID = 'document.getDocumentDivision';
-      }
+      $division_args = new stdClass();
+      $division_args->module_srl = $args->module_srl;
+      $division_args->exclude_module_srl = $args->exclude_module_srl;
 
       // If you do not value the best division top
-      if(!$division)
+      if(!$args->division)
       {
-        $division_args = new stdClass();
-        $division_args->module_srl = $args->module_srl;
-        $division_args->exclude_module_srl = $args->exclude_module_srl;
-        $division_args->list_count = 1;
-        $division_args->sort_index = $args->sort_index;
-        $division_args->order_type = $args->order_type;
-        $division_args->statusList = $args->statusList;
-
-        $output = executeQuery($divisionSqlID, $division_args, array('list_order'));
-        if($output->data)
-        {
-          $item = array_pop($output->data);
-          $division = $item->list_order;
-        }
-        $division_args = null;
+        $args->division = array_pop(executeQuery('document.getDocumentDivision', $division_args, array('list_order'))->data)->list_order;
+        Context::set('division', $args->division);
       }
 
-      // The last division
-      $last_division = (int)Context::get('last_division');
-
       // Division after division from the 5000 value of the specified Wanted
-      if(!$last_division)
+      if(!$args->last_division)
       {
-        $last_division_args = new stdClass();
-        $last_division_args->module_srl = $args->module_srl;
-        $last_division_args->exclude_module_srl = $args->exclude_module_srl;
-        $last_division_args->list_count = 1;
-        $last_division_args->sort_index = $args->sort_index;
-        $last_division_args->order_type = $args->order_type;
-        $last_division_args->list_order = $division;
-        $last_division_args->page = 5001;
-
-        $output = executeQuery($divisionSqlID, $last_division_args, array('list_order'));
-        if($output->data)
-        {
-          $item = array_pop($output->data);
-          $last_division = $item->list_order;
-        }
+        $division_args->list_order = $args->division;
+        $division_args->page = 5001;
+        $args->last_division = array_pop(executeQuery('document.getDocumentDivision', $division_args, array('list_order'))->data)->list_order;
       }
 
       // Make sure that after last_division article
-      if($last_division)
+      if($args->last_division)
       {
-        $last_division_args = new stdClass();
-        $last_division_args->module_srl = $args->module_srl;
-        $last_division_args->exclude_module_srl = $args->exclude_module_srl;
-        $last_division_args->list_order = $last_division;
-        $output = executeQuery('document.getDocumentDivisionCount', $last_division_args);
-        if($output->data->count<1) $last_division = null;
+        $division_args->list_order = $args->division;
+        if(executeQuery('document.getDocumentDivisionCount', $division_args)->data->count < 1) $args->last_division = null;
       }
+      Context::set('last_division', $args->last_division);
 
-      $args->division = $division;
-      $args->last_division = $last_division;
-      Context::set('division', $division);
-      Context::set('last_division', $last_division);
+    }
 
+    // add default prefix
+    if($args->sort_index && strpos($args->sort_index, '.') === false)
+    {
+      $args->sort_index = 'documents.' . $args->sort_index;
+    }
+    foreach($args->columnList as $key => $column)
+    {
+      if(strpos($column, '.') !== false)
+      {
+        continue;
+      }
+      $args->columnList[$key] = 'documents.' . $column;
     }
   }
 
