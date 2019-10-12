@@ -243,13 +243,24 @@ class full_searchModel extends full_search
 
     if($searchOpt->search_target && $searchOpt->search_keyword)
     {
+      $search_regexp = '/"([^"]+)"/';
+      $search_targets = explode(",", $searchOpt->search_target);
+      $search_keywords = htmlspecialchars_decode($searchOpt->search_keyword);
+      $match_keyword = array();
       $search_list = array();
       $eid = array();
       $var_idx = array();
 
-      // Search options
-      $search_targets = explode(",", $searchOpt->search_target);
-      $search_keywords = explode(" ", $searchOpt->search_keyword);
+      // get the search keywords.
+      if(preg_match_all($search_regexp, $search_keywords, $matchs) > 0)
+      {
+        foreach($matchs[1] as $key => $keyword)
+        {
+          $match_keyword[] = $keyword;
+        }
+        $search_keywords = preg_replace($search_regexp, "", $search_keywords);
+      }
+      $search_keywords = array_merge(explode(" ", $search_keywords), $match_keyword);
 
       foreach($search_targets as $i => $search_target)
       {
