@@ -547,39 +547,145 @@ class full_searchModel extends full_search
 
   function triggerGetDocumentListTotalBefore(&$obj)
   {
-//    if(Context::get('mid') !== 'lab2') return;
-
     $oModuleModel = getModel('module');
     $full_search_config = $oModuleModel->getModuleConfig('full_search');
 
-    if($full_search_config->is_full_search == 'Y')
-    {
-      if($obj->search_target && $obj->search_keyword)
-      {
-        unset($obj->page);
-        unset($obj->search_target);
-        unset($obj->search_keyword);
-      }
-    }
+    if($full_search_config->is_full_search !== 'Y') return;
+    if(!$obj->search_target && !$obj->search_keyword) return;
+
+    unset($obj->page);
+    unset($obj->search_target);
+    unset($obj->search_keyword);
   }
 
   function triggerGetDocumentListTotalAfter(&$output)
   {
-//    if(Context::get('mid') !== 'lab2') return;
-
     $oModuleModel = getModel('module');
     $full_search_config = $oModuleModel->getModuleConfig('full_search');
 
-    if($full_search_config->is_full_search == 'Y')
+    if($full_search_config->is_full_search !== 'Y') return;
+    if(!Context::get('search_target') && !Context::get('search_keyword')) return;
+
+    $_this = $GLOBALS['_loaded_module']['board']['view']['svc'];
+    $args = $this->dispBoardContentList($_this);
+    $args->columnList = $_this->columnList;
+
+    $output = $this->getDocumentList($args, $args->except_notice, TRUE, $args->columnList);
+  }
+
+  function getDocumentListTotal()
+  {
+    $oModuleModel = getModel('module');
+    $full_search_config = $oModuleModel->getModuleConfig('full_search');
+
+    if($full_search_config->is_full_search !== 'Y') return;
+    if(!Context::get('search_target') && !Context::get('search_keyword')) return;
+
+    $_this = $GLOBALS['_loaded_module']['board']['view']['svc'];
+    $_this->module_srl = $oModuleModel->getModuleSrlByMid(Context::get('cur_mid'));
+
+    $args = $this->dispBoardContentList($_this);
+    $args->columnList = $_this->columnList;
+
+    $output = $this->getDocumentList($args, $args->except_notice, TRUE, $args->columnList);
+
+    $data = array();
+    $variables = new stdClass();
+    if(count($output->data))
     {
-      if(Context::get('search_target') && Context::get('search_keyword'))
+      foreach($output->data as $number => $document)
       {
-        $_this = $GLOBALS['_loaded_module']['board']['view']['svc'];
-        $args = $this->dispBoardContentList($_this);
-        $args->columnList = $_this->columnList;
-    
-        $output = $this->getDocumentList($args, $args->except_notice, TRUE, $args->columnList);
+        unset($document->variables['value']);
+        unset($document->variables['tag']);
+        unset($document->variables['comments_content']);
+        unset($document->variables['password']);
+        $document->variables['ipaddress'] = $document->getIpAddress();
+
+        $data[$number] = $document->variables;
       }
+    }
+
+    if(!$this->checkCSRF())
+    {
+      return class_exists('BaseObject') ? new BaseObject(-1, 'msg_invalid_request') : new Object(-1, 'msg_invalid_request');
+    }
+
+    $this->add('list_config', $_this->listConfig);
+    $this->add('document_list', $data);
+    $this->add('total_count', $output->total_count);
+    $this->add('total_page', $output->total_page);
+    $this->add('page', $output->page);
+    $this->add('page_navigation', $output->page_navigation);
+    $this->add('httpStatusCode', $output->httpStatusCode);
+  }
+
+  function checkCSRF($referer = null)
+  {
+    if(method_exists('Rhymix\Framework\Security', 'checkCSRF') && method_exists('Rhymix\Framework\Session', 'verifyToken'))
+    {
+      /* Rhymix */
+      if ($token = $_SERVER['HTTP_X_CSRF_TOKEN'])
+      {
+        return Rhymix\Framework\Session::verifyToken($token);
+      }
+      elseif ($token = \Context::get('_rx_csrf_token'))
+      {
+        return Rhymix\Framework\Session::verifyToken($token);
+      }
+      else
+      {
+        if (Rhymix\Framework\Session::getMemberSrl())
+        {
+          trigger_error('CSRF token missing in POST request: ' . (\Context::get('act') ?: '(no act)'), \E_USER_WARNING);
+        }
+        
+        $referer = strval($referer ?: $_SERVER['HTTP_REFERER']);
+        if ($referer !== '')
+        {
+          return Rhymix\Framework\URL::isInternalURL($referer);
+        }
+        else
+        {
+          return false;
+        }
+      }
+    }
+    else
+    {
+      /* Xpressengine */
+      $default_url = Context::getDefaultUrl();
+      $referer = $_SERVER["HTTP_REFERER"];
+
+      if(strpos($default_url, 'xn--') !== FALSE && strpos($referer, 'xn--') === FALSE)
+      {
+        require_once(_XE_PATH_ . 'libs/idna_convert/idna_convert.class.php');
+        $IDN = new idna_convert(array('idn_version' => 2008));
+        $referer = $IDN->encode($referer);
+      }
+
+      $default_url = parse_url($default_url);
+      $referer = parse_url($referer);
+
+      $oModuleModel = getModel('module');
+      $siteModuleInfo = $oModuleModel->getDefaultMid();
+
+      if($siteModuleInfo->site_srl == 0)
+      {
+        if($default_url['host'] !== $referer['host'])
+        {
+          return FALSE;
+        }
+      }
+      else
+      {
+        $virtualSiteInfo = $oModuleModel->getSiteInfo($siteModuleInfo->site_srl);
+        if(strtolower($virtualSiteInfo->domain) != strtolower(Context::get('vid')) && !strstr(strtolower($virtualSiteInfo->domain), strtolower($referer['host'])))
+        {
+          return FALSE;
+        }
+      }
+
+      return TRUE;
     }
   }
 }
