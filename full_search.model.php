@@ -19,7 +19,7 @@ class full_searchModel extends full_search
     // setup module_srl/page number/ list number/ page count
     $args = new stdClass();
     $args->module_srl = $_this->module_srl;
-		$args->page = intval(Context::get('page')) ?: null;
+    $args->page = intval(Context::get('page')) ?: null;
     $args->list_count = $_this->list_count;
     $args->page_count = $_this->page_count;
 
@@ -47,22 +47,22 @@ class full_searchModel extends full_search
 
     // set the current page of documents
     $document_srl = Context::get('document_srl');
-		if($document_srl && $_this->module_info->skip_bottom_list_for_robot === 'Y' && isCrawler())
-		{
-			Context::set('page', $args->page = null);
-		}
-		elseif(!$args->page && $document_srl)
-		{
+    if($document_srl && $_this->module_info->skip_bottom_list_for_robot === 'Y' && isCrawler())
+    {
+      Context::set('page', $args->page = null);
+    }
+    elseif(!$args->page && $document_srl)
+    {
       $oDocument = $oDocumentModel->getDocument($document_srl);
       if($oDocument->isExists() && !$oDocument->isNotice())
       {
-				$days = $_this->module_info->skip_bottom_list_days ?: 30;
-				if($oDocument->getRegdateTime() < (time() - (86400 * $days)) && $_this->module_info->skip_bottom_list_for_olddoc === 'Y')
-				{
-					Context::set('page', $args->page = null);
-				}
-				else
-				{
+        $days = $_this->module_info->skip_bottom_list_days ?: 30;
+        if($oDocument->getRegdateTime() < (time() - (86400 * $days)) && $_this->module_info->skip_bottom_list_for_olddoc === 'Y')
+        {
+          Context::set('page', $args->page = null);
+        }
+        else
+        {
           $page = $this->getDocumentPage($oDocument, $args);
           Context::set('page', $page);
           $args->page = $page;
@@ -76,18 +76,18 @@ class full_searchModel extends full_search
       $args->list_count = $_this->search_list_count;
     }
 
-		// if the consultation function is enabled,  the get the logged user information
-		if($_this->consultation)
-		{
-			$logged_info = Context::get('logged_info');
-			$args->member_srl = $logged_info->member_srl;
+    // if the consultation function is enabled,  the get the logged user information
+    if($_this->consultation)
+    {
+      $logged_info = Context::get('logged_info');
+      $args->member_srl = $logged_info->member_srl;
 
-			if($this->module_info->use_anonymous === 'Y')
-			{
-				unset($args->member_srl);
-				$args->member_srls = $logged_info->member_srl . ',' . $logged_info->member_srl * -1;
-			}
-		}
+      if($this->module_info->use_anonymous === 'Y')
+      {
+        unset($args->member_srl);
+        $args->member_srls = $logged_info->member_srl . ',' . $logged_info->member_srl * -1;
+      }
+    }
 
     return $args;
   }
@@ -203,16 +203,16 @@ class full_searchModel extends full_search
     $args->exclude_eid = is_array($searchOpt->exclude_eid) ? implode(',', $searchOpt->exclude_eid) : $searchOpt->exclude_eid;
     $args->category_srl = $searchOpt->category_srl ?: null;
     $args->member_srl = $searchOpt->member_srl ?: ($searchOpt->member_srls ?: null);
-		$args->order_type = $searchOpt->order_type === 'desc' ? 'desc' : 'asc';
-		$args->sort_index = $searchOpt->sort_index;
+    $args->order_type = $searchOpt->order_type === 'desc' ? 'desc' : 'asc';
+    $args->sort_index = $searchOpt->sort_index;
     $args->page = $searchOpt->page ?: 1;
     $args->list_count = $searchOpt->list_count ?: 20;
     $args->page_count = $searchOpt->page_count ?: 10;
     $args->start_date = $searchOpt->start_date ?: null;
     $args->end_date = $searchOpt->end_date ?: null;
-		$args->s_is_notice = $searchOpt->except_notice ? 'N' : null;
-		$args->statusList = $searchOpt->statusList ?: array($oDocumentModel->getConfigStatus('public'), $oDocumentModel->getConfigStatus('secret'));
-		$args->columnList = $searchOpt->columnList ?: array();
+    $args->s_is_notice = $searchOpt->except_notice ? 'N' : null;
+    $args->statusList = $searchOpt->statusList ?: array($oDocumentModel->getConfigStatus('public'), $oDocumentModel->getConfigStatus('secret'));
+    $args->columnList = $searchOpt->columnList ?: array();
 
     if($searchOpt->mid)
     {
@@ -263,21 +263,21 @@ class full_searchModel extends full_search
             $args->{'s_'.$search_target} = $search_keywords[0];
             break;
           case 'is_notice' == $search_target :
-            if($search_keywords[0]=='N') $args->s_is_notice = 'N';
-            elseif($search_keywords[0]=='Y') $args->s_is_notice = 'Y';
+            if($search_keywords[0] == 'N') $args->s_is_notice = 'N';
+            elseif($search_keywords[0] == 'Y') $args->s_is_notice = 'Y';
             else $args->s_is_notice = '';
             break;
           case 'is_secret' == $search_target :
-            if($search_keywords[0]=='N')
+            if($search_keywords[0] == 'N')
             {
               $args->statusList = array($$oDocumentModel->getConfigStatus('public'));
             }
-            elseif($search_keywords[0]=='Y')
+            elseif($search_keywords[0] == 'Y')
             {
               $args->statusList = array($oDocumentModel->getConfigStatus('secret'));
-              $args->is_secret = 'N';
+              $args->is_secret = array('N', 0);
             }
-            elseif($search_keywords[0]=='temp')
+            elseif($search_keywords[0] == 'temp')
             {
               $args->statusList = array($oDocumentModel->getConfigStatus('temp'));
             }
@@ -305,8 +305,34 @@ class full_searchModel extends full_search
         }
       }
 
-      if(count($eid) > 0) $args->eid = implode(',', $eid);
-      if(count($var_idx) > 0) $args->var_idx = implode(',', $var_idx);
+      // exclude secret documents in searching if current user does not have privilege
+      if(!$args->member_srl || !Context::get('is_logged') || ($args->member_srl !== Context::get('logged_info')->member_srl))
+      {
+        $module_info = $oModuleModel->getModuleInfoByModuleSrl($args->module_srl);
+        if(!$oModuleModel->getGrant($module_info, Context::get('logged_info'))->manager)
+        {
+          $args->statusList = array($oDocumentModel->getConfigStatus('public'));
+          $args->is_secret = array('N', 0);
+        }
+      }
+
+      if(count($var_idx) > 0)
+      {
+        $args->var_idx = implode(',', $var_idx);
+      }
+      if($args->exclude_var_idx)
+      {
+        unset($args->var_idx);
+      }
+
+      if(count($eid) > 0)
+      {
+        $args->eid = implode(',', $eid);
+      }
+      if($args->exclude_eid)
+      {
+        unset($args->eid);
+      }
 
       if(count(array_intersect($search_list, array('title' => 's_title', 'content' => 's_content'))) == 2)
       {

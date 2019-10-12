@@ -104,7 +104,7 @@
       <conditions>
         <condition operation="in" column="sub_document_tags.module_srl" var="module_srl" filter="number" />
         <condition operation="notin" column="sub_document_tags.module_srl" var="exclude_module_srl" filter="number" pipe="and" />
-        <condition operation="equal" column="comments.is_secret" var="is_secret" pipe="and" />
+        <condition operation="in" column="IFNULL(comments.is_secret,0)" var="is_secret" pipe="and" />
       </conditions>
       <navigation />
       <groups>
