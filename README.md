@@ -33,7 +33,7 @@ _(modules/board/skins/default/list.html)_
 | 속성 | 기본 값 | 설명 |
 | :-- | :----- | :-- |
 | search_target | `title_content` | 아래는 XE가 기본적으로 설정 가능한 값을 제외하고 추가 된 속성 값 입니다. <br> `title_content_comment` <br> `title_content_tag` <br> `title_content_extra_vars` <br> `title_content_comment_tag` <br> `all_content` <br><br> 속성 값은 연속으로 나열 할 수 있습니다. <br> ``` &search_target=title,content,comment,extra_vars,... ``` |
-| search_keyword | `null` | 검색어를 띄어쓰기를 이용해 최대 5개의 단어를 포함한 게시물을 검색 할 수 있습니다. <br><br> _예) 게시판 등록 에러 안돼요_ <br><br> (검색 키워드는 부분일치가 아니라 모든 단어를 포함할 경우 일치 합니다.) |
+| search_keyword | `null` | 검색어를 띄어쓰기를 이용해 최대 5개의 단어를 포함한 게시물을 검색 할 수 있습니다. <br><br> _예1) 게시판 등록 에러 안돼요_ <br>_예2) "게시판 등록" 에러 안돼요_ <br><br> ※ "(따옴표)안의 문장은 하나의 단어로 검색을 시도합니다.<br>※ 검색 키워드는 부분일치가 아니라 모든 단어를 포함할 경우 일치 합니다. |
 
 ##### 속성
 
@@ -48,6 +48,65 @@ _(modules/board/skins/default/list.html)_
 | `extra_vars` | 사용자 정의를 통합 검색 합니다. |
 | `extra_vars[0-9]` | 사용자 정의 `var_idx`를 조건으로 검색 합니다. <br><br> 속성 값은 연속으로 나열 할 수 있습니다. <br> ``` &search_target=extra_vars1,extra_vars2,,... ``` |
 | `사용자 정의` | xe가 제공하는 검색 옵션과 full search가 제공하는 검색 옵션을 제외한 속성 값은 사용자 정의 `eid`로 인식하여 검색을 시도 합니다.  <br><br> 속성 값은 연속으로 나열 할 수 있습니다. <br> ``` &search_target=age,address,,... ``` |
+
+##### API
+
+| 속성 | 기본 값 | 설명 |
+| :-- | :----- | :-- |
+| module | `full_search` | full_search 모듈명 |
+| act | `getDocumentListTotal` | act명 |
+| cur_mid | `null` | mid명 |
+
+_API 호출 예(jquery)_
+```javascript
+$.ajax({
+  url: request_uri,
+  method: 'POST',
+  data: {
+    'module': 'full_search',
+    'act': 'getDocumentListTotal',
+    'cur_mid': 'mid',
+    'search_target': 'all_content',
+    'search_keyword': '키워드'
+  },
+  dataType: 'json',
+  contentType: 'application/json'
+})
+.done(function (data) {
+  console.log(data.document_list);
+})
+.fail(function (error) {
+  console.log(error);
+});
+```
+
+_API 호출 예(fetch)_
+```javascript
+let url_obj = new URL(request_uri);
+let params = new URLSearchParams();
+params.set('module', 'full_search');
+params.set('act', 'getDocumentListTotal');
+params.set('cur_mid', 'board');
+params.set('search_target', 'all_content');
+params.set('search_keyword', '키워드');
+
+url_obj.search = params.toString();
+fetch(url_obj2.toString(), {
+  method : 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+.then((response) => {
+  return response.json();
+})
+.then((data) => {
+  console.log(data.document_list);
+})
+.catch((error) => {
+  _throwError(error)
+})
+```
 
 ### 향후 개발 내용
 목표로 하는 것은 github.com의 [Searching issues and pull requests](https://help.github.com/en/articles/searching-issues-and-pull-requests) 가 xe에서도 사용할 수 있게 하는 것 입니다. 현재는 특정 검색 대상으로 모든 단어를 검색하도록 시도하지만 향후 각 검색 대상에 맞는 검색어를 따로 정할 수 있게 하여 스킨에서 다양한 검색 조건을 만들 수 있는 것을 목표로 하고 있습니다.
