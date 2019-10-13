@@ -91,7 +91,7 @@ params.set('search_target', 'all_content');
 params.set('search_keyword', '키워드');
 
 url_obj.search = params.toString();
-fetch(url_obj2.toString(), {
+fetch(url_obj.toString(), {
   method : 'POST',
   headers: {
     'Content-Type': 'application/json'
