@@ -282,7 +282,7 @@ class full_searchModel extends full_search
           case 'is_secret' == $search_target :
             if($search_keywords[0] == 'N')
             {
-              $args->statusList = array($$oDocumentModel->getConfigStatus('public'));
+              $args->statusList = array($oDocumentModel->getConfigStatus('public'));
             }
             elseif($search_keywords[0] == 'Y')
             {
