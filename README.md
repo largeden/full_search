@@ -110,3 +110,5 @@ fetch(url_obj.toString(), {
 
 ### 향후 개발 내용
 목표로 하는 것은 github.com의 [Searching issues and pull requests](https://help.github.com/en/articles/searching-issues-and-pull-requests) 가 xe에서도 사용할 수 있게 하는 것 입니다. 현재는 특정 검색 대상으로 모든 단어를 검색하도록 시도하지만 향후 각 검색 대상에 맞는 검색어를 따로 정할 수 있게 하여 스킨에서 다양한 검색 조건을 만들 수 있는 것을 목표로 하고 있습니다.
+
+test20240809
